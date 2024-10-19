@@ -1,21 +1,32 @@
-document.getElementById('languageSwitcher').addEventListener('change', function (){
-    const selectedLang = this.value;;
+document.addEventListener('DOMContentLoaded', function () {
+    const languageSelector = document.getElementById('language-selector');
+    
+    if (languageSelector) {
+        languageSelector.addEventListener('change', function () {
+            const selectedLanguage = this.value;
+            const textToTranslate = document.getElementById('content').innerText;
 
-    const texts = {
-        title: document.getElementById('title').innerText,
-        description: document.getElementById('description').innerText
-    };
-
-    for (let key in texts) {
-        fetch('translate.php?lang=${selectedLang}&text=${encodeURIComponent(texts[key])}')
-        .then(response => response.json())
-        .then(data => {
-            if(data.translations) {
-                document.getElementById(key).innerText = data.translations[0].translatedText;
-            } else {
-                console.error('Translation error:', data.error);
-            }
-        })
-        .catch(error => console.error('Error:' ,error));
+            fetch('translate.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: textToTranslate,
+                    target: selectedLanguage
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.translatedText) {
+                    document.getElementById('content').innerText = data.translatedText;
+                } else {
+                    console.error('Translation error:', data);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    } else {
+        console.error("Language selector element not found!");
     }
 });
